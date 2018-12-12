@@ -18,23 +18,77 @@ import String;
 
 AForm cst2ast(start[Form] sf) {
   Form f = sf.top; // remove layout before and after form
-  return form("", [], src=f@\loc); 
+  return cst2ast(f);
+  //return form("", [], src=f@\loc); 
 }
 
+
+
+AForm cst2ast(f:(Form)`form <Id x> { <Question* qs> }`)
+  = form("<x>", [cst2ast(q) | Question q <- qs], src=f@\loc)
+  ;
+
 AQuestion cst2ast(Question q) {
-  throw "Not yet implemented";
+  switch(q) {
+    case (Question)`<Str questionText> <Identifier id> : <Type t>`:
+      return qSimple("<questionText>", "<id>", cst2ast(t), src=q@\loc);
+      
+    case (Question)`<Str questionText> <Identifier id> : <Type t> = <Expr e>`:
+      return qSimpleDef("<questionText>", "<id>", cst2ast(t), cst2ast(e), src=q@\loc);
+      
+	case (Question)`if ( <Expr cond> ) { <Question* qs> }`:
+	  return qIf(cst2ast(cond), [cst2ast(q) | Question q <- qs], src=q@\loc);
+	
+	case (Question)`if ( <Expr cond> ) { <Question* qs1> } else { <Question* qs2> }` :
+	  return qIfElse(cst2ast(cond), 
+	                   [cst2ast(q) | Question q <- qs1],
+	                     [cst2ast(q) | Question q <- qs2],
+                           src=q@\loc);
+  }
 }
 
 AExpr cst2ast(Expr e) {
   switch (e) {
-    case (Expr)`<Id x>`: return ref("<x>", src=x@\loc);
+    // identifier
+    case (Expr)`<Id x>`: return ref("<x>", src=e@\loc);
     
-    // etc.
+    // literal expressions
+    case (Expr)`<Int i>`: return eInt(toInt("<i>"), src=e@\loc);
+    case (Expr)`<Bool b>`: return eBool("<b>" == "true", src=e@\loc);
+    case (Expr)`<Str s>`: return eStr("<s>", src=e@\loc);
+    
+    case (Expr)`( <Expr ex> )`:
+      return eBracks( cst2ast(ex), src=e@\loc );
+    
+    // arithmetic operations
+    case (Expr)`<Expr e1> / <Expr e2>`:
+      return eDiv(cst2ast(e1), cst2ast(e2));
+    case (Expr)`<Expr e1> * <Expr e2>`:
+      return eProd(cst2ast(e1), cst2ast(e2));
+    case (Expr)`<Expr e1> - <Expr e2>`:
+      return eSub(cst2ast(e1), cst2ast(e2));
+    case (Expr)`<Expr e1> + <Expr e2>`:
+      return eAdd(cst2ast(e1), cst2ast(e2));
+    
+    // comparison operations
+    case (Expr)`<Expr e1> \< <Expr e2>`:
+      return eLt(cst2ast(e1), cst2ast(e2));
+    case (Expr)`<Expr e1> \<= <Expr e2>`:
+      return eLeq(cst2ast(e1), cst2ast(e2));
+    case (Expr)`<Expr e1> \> <Expr e2>`:
+      return eGt(cst2ast(e1), cst2ast(e2));
+    case (Expr)`<Expr e1> \>= <Expr e2>`:
+      return eGeq(cst2ast(e1), cst2ast(e2));
+      
     
     default: throw "Unhandled expression: <e>";
   }
 }
 
 AType cst2ast(Type t) {
-  throw "Not yet implemented";
+  switch (t) {
+    case (Type)`integer` : return typeInt(src=t@\loc);
+    case (Type)`boolean` : return typeBool(src=t@\loc);
+    case (Type)`string`  : return typeStr(src=t@\loc);
+  }
 }

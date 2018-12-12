@@ -1,0 +1,13 @@
+form emptyForm {
+  "Simple question"
+    answer: integer = (1)
+    
+  if(answer) {
+    "Are you sure?"
+      answer2: boolean = false
+  }
+  else {
+    "ASDF"
+      answer3: string = "hello world"
+  }
+}

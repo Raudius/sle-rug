@@ -11,38 +11,39 @@ start syntax Form
   = "form" Id Block; 
 
 
-
-// TODO: question, computed question, block, if-then-else, if-then
 syntax Block = "{" Question* "}" ;
 
-syntax Identifier = Id \ "true" \ "false";
+syntax Identifier = Id \ "true" \ "false" \ "form" \ "if" \ "else";
 
-syntax IdDefinition
-  = Identifier ":" Type
-  | Identifier ":" Type "=" Expr
-  ;
 
 syntax Question
   = "if" "(" Expr ")" Block 
   | "if" "(" Expr ")" Block "else" Block
-  | Str IdDefinition
+  | Str Identifier ":" Type
+  | Str Identifier ":" Type "=" Expr 
   ; 
   
   
-
-// TODO: +, -, *, /, &&, ||, !, >, <, <=, >=, ==, !=, literals (bool, int, str)
-// Think about disambiguation using priorities and associativity
-// and use C/Java style precedence rules (look it up on the internet)
 syntax Expr 
   = Identifier
   | Int
   | Bool
+  | Str
   | "(" Expr ")"
-  > Expr [\<|\>|\<=|\>=] Expr
-  > Expr '/' Expr
-  > Expr '*' Expr
-  > Expr '+' Expr
-  > Expr '-' Expr
+  > left ( 
+    Expr '/' Expr
+    | Expr '*' Expr
+  )
+  > left( 
+    Expr '+' Expr
+    | Expr '-' Expr
+  )
+  > non-assoc( 
+    Expr '\<' Expr 
+    | Expr '\<=' Expr 
+    | Expr '\>' Expr 
+    | Expr '\>=' Expr 
+    )
   ;
   
 syntax Type = "boolean" | "integer" | "string";  
