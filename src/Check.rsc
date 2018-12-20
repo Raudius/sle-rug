@@ -21,20 +21,14 @@ alias TEnv = rel[loc def, str name, str label, Type \type];
 
 TEnv collect(qSimple(str question, str id, AType t)) = {<t.src, id, question, getType(t)>};
 TEnv collect(qSimpleDef(str question, str id, AType t, AExpr val)) = {<t.src, id, question, getType(t)>};
+// no need to collect branches because of deep matching, therefore, return empty relations:
 TEnv collect(qIf(AExpr cond, list[AQuestion] block)) = {};
 TEnv collect(qIfElse(AExpr cond, list[AQuestion] ifBlock, list[AQuestion] elseBlock)) = {};
 
-
 // To avoid recursively traversing the form, use the `visit` construct
 // or deep match (e.g., `for (/question(...) := f) {...}` ) 
-TEnv collect(AForm f) {
-  TEnv env = {};
-  
-  for (/AQuestion q := f)
-    env += collect(q);
-  
-  return env; 
-}
+TEnv collect(AForm f) = {*collect(q) | /AQuestion q := f};
+
 
 set[Message] check(AForm f, TEnv tenv, UseDef useDef) {
   return {}; 

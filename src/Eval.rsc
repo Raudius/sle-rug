@@ -57,14 +57,21 @@ VEnv initialEnv(AForm f) {
     env = initialEval(f.questions, env);
 }
 
+
 VEnv initialEval(list[AQuestion] qs, VEnv env) {
   for(AQuestion q <- qs) {
     switch(q) {
+      // default value creation
       case qSimple(str question, str id, AType t):
         env[id] = defaultValue(t);
+        
+      // try to apply definition to question 
+      // ignore failures as  we can assume name correctness
       case qSimpleDef(str question, str id, AType t, AExpr val):
         try env[id] = eval(val, env);
         catch NoSuchKey: ; 
+        
+      // branching
       case qIf(AExpr cond, list[AQuestion] block):
         if( eval(cond, env).b )  env = initialEval(block, env);
       case qIfElse(AExpr cond, list[AQuestion] ifBlock, list[AQuestion] elseBlock):
@@ -79,29 +86,42 @@ VEnv initialEval(list[AQuestion] qs, VEnv env) {
 // Because of out-of-order use and declaration of questions
 // we use the solve primitive in Rascal to find the fixpoint of venv.
 VEnv eval(AForm f, Input inp, VEnv venv) {
-  venv[inp.question] =  inp.\value;
-    
   return solve (venv) {
-    venv = eval(f.questions, venv);
+    venv = evalOnce(f, inp, venv);
   }
 }
 
+VEnv evalOnce(AForm f, Input inp, VEnv venv) {
+  for(AQuestion q <- f.questions)
+    venv = eval(q, inp, venv);
+  return venv;
+}
 
 
-VEnv eval(list[AQuestion] qs, VEnv env) {
-  for(AQuestion q <- qs) {
-    switch(q) {
-      case qSimpleDef(str question, str id, AType t, AExpr val):
-        try env[id] = eval(val, env);
-        catch NoSuchKey: ; 
-      case qIf(AExpr cond, list[AQuestion] block):
-        if( eval(cond, env).b )  env = initialEval(block, env);
-      case qIfElse(AExpr cond, list[AQuestion] ifBlock, list[AQuestion] elseBlock):
-        if ( eval(cond,env).b ) env = initialEval(ifBlock, env);
-        else env = initialEval(elseBlock, env);  
-    }
+VEnv eval(AQuestion q, Input inp, VEnv venv) {
+  switch(q) {
+    // Simple question
+    case qSimple(str question, str id, AType t): // check type match?
+      if(inp.question == id) venv[id] = inp.\value;
+      
+    // Computed question (i.e. with definition)
+    case qSimpleDef(str question, str id, AType t, AExpr val):
+      venv[id] = eval(val, venv);
+
+    // If question
+    case qIf(AExpr cond, list[AQuestion] block):
+      if( eval(cond, env).b )
+        for(AQuestion q <- block)  eval(q, inp, venv);
+    
+    // If-then-else question
+    case qIfElse(AExpr cond, list[AQuestion] ifBlock, list[AQuestion] elseBlock):
+      if( eval(cond, venv).b )
+        for(AQuestion q <- ifBlock)   eval(q, inp, venv);
+      else
+        for(AQuestion q <- elseBlock) eval(q, inp, venv);
   }
-  return env;
+  
+  return venv; 
 }
 
 
