@@ -1,4 +1,4 @@
-module Eval
+module Eval_no_ifs
 
 import IO;
 import AST;
@@ -53,73 +53,62 @@ Value eval(AQuestion q, VEnv env) {
 // (e.g. 0 for int, "" for str etc.)
 VEnv initialEnv(AForm f) {
   VEnv env = ();
-  return solve(env)
-    env = initialEval(f.questions, env);
-}
-
-VEnv initialEval(list[AQuestion] qs, VEnv env) {
-  for(AQuestion q <- qs) {
-    switch(q) {
-      case qSimple(str question, str id, AType t):
-        env[id] = defaultValue(t);
-      case qSimpleDef(str question, str id, AType t, AExpr val):
-        try env[id] = eval(val, env);
-        catch NoSuchKey: ; 
-      case qIf(AExpr cond, list[AQuestion] block):
-        if( eval(cond, env).b )  env = initialEval(block, env);
-      case qIfElse(AExpr cond, list[AQuestion] ifBlock, list[AQuestion] elseBlock):
-        if ( eval(cond,env).b ) env = initialEval(ifBlock, env);
-        else env = initialEval(elseBlock, env);  
-    }
+  
+  bool unresolved = true;
+  while(unresolved) {
+    unresolved = false;
+    for(AQuestion q := f) {
+      if (!q has id) continue; // ignore if 'questions' 
+      
+      try
+        env[q.id] = eval(q, env);
+      catch NoSuchKey:
+        unresolved = true;
+    }  
   }
   return env;
 }
+
+
 
 
 // Because of out-of-order use and declaration of questions
 // we use the solve primitive in Rascal to find the fixpoint of venv.
 VEnv eval(AForm f, Input inp, VEnv venv) {
-  venv[inp.question] =  inp.\value;
-    
   return solve (venv) {
-    venv = eval(f.questions, venv);
+    venv = evalOnce(f, inp, venv);
   }
 }
 
 
 
-VEnv eval(list[AQuestion] qs, VEnv env) {
-  for(AQuestion q <- qs) {
-    switch(q) {
-      case qSimpleDef(str question, str id, AType t, AExpr val):
-        try env[id] = eval(val, env);
-        catch NoSuchKey: ; 
-      case qIf(AExpr cond, list[AQuestion] block):
-        if( eval(cond, env).b )  env = initialEval(block, env);
-      case qIfElse(AExpr cond, list[AQuestion] ifBlock, list[AQuestion] elseBlock):
-        if ( eval(cond,env).b ) env = initialEval(ifBlock, env);
-        else env = initialEval(elseBlock, env);  
-    }
-  }
-  return env;
+VEnv evalOnce(AForm f, Input inp, VEnv venv) {
+  venv[inp.question] =  inp.\value;
+  
+  for (/AQuestion q := f)
+    eval(q, inp, venv);
+  
+  return venv; 
 }
 
 
+
+VEnv eval(AQuestion q, Input inp, VEnv venv) {
+  if (q has val) 
+    ;
+  
+  return venv; 
+}
 
 
 Value eval(AExpr e, VEnv venv) {
   int n;
   switch (e) {
-    // reference 
     case ref(str x): return venv[x];
-    
-    // literals
     case eInt(int n): return vint(n);
     case eBool(bool b): return vbool(b);
     case eStr(str s): return vstr(s);
     case eBracks(AExpr e1): return eval(e1, venv);
-    
-    // comparators
     case eLt(AExpr e1, AExpr e2): 
       return vbool( eval(e1, venv).n < eval(e2, venv).n );
     case eLeq(AExpr e1, AExpr e2): 
@@ -128,8 +117,6 @@ Value eval(AExpr e, VEnv venv) {
       return vbool( eval(e1, venv).n > eval(e2, venv).n );
     case eGeq(AExpr e1, AExpr e2): 
       return vbool( eval(e1, venv).n >= eval(e2, venv).n );
-    
-    // arithmetical operators
     case eDiv(AExpr e1, AExpr e2): 
       n = eval(e1, venv).n / eval(e2, venv).n;
     case eProd(AExpr e1, AExpr e2): 

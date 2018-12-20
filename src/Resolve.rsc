@@ -31,7 +31,7 @@ Use uses(AForm f) {
   
   for(/AExpr e := f) {
   	if(e has name)
-  	  uses += { <e.src, e.name>};
+  	  uses += { <e.src, e.name> };
   }
   return uses;
 }

@@ -10,14 +10,30 @@ data Type
   | tstr()
   | tunknown()
   ;
+  
+Type getType(typeBool()) = tbool();
+Type getType(typeInt()) = tint();
+Type getType(typeStr()) = tstr();
 
 // the type environment consisting of defined questions in the form 
 alias TEnv = rel[loc def, str name, str label, Type \type];
 
+
+TEnv collect(qSimple(str question, str id, AType t)) = {<t.src, id, question, getType(t)>};
+TEnv collect(qSimpleDef(str question, str id, AType t, AExpr val)) = {<t.src, id, question, getType(t)>};
+TEnv collect(qIf(AExpr cond, list[AQuestion] block)) = {};
+TEnv collect(qIfElse(AExpr cond, list[AQuestion] ifBlock, list[AQuestion] elseBlock)) = {};
+
+
 // To avoid recursively traversing the form, use the `visit` construct
 // or deep match (e.g., `for (/question(...) := f) {...}` ) 
 TEnv collect(AForm f) {
-  return {}; 
+  TEnv env = {};
+  
+  for (/AQuestion q := f)
+    env += collect(q);
+  
+  return env; 
 }
 
 set[Message] check(AForm f, TEnv tenv, UseDef useDef) {
