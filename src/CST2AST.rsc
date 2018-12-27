@@ -62,23 +62,23 @@ AExpr cst2ast(Expr e) {
     
     // arithmetic operations
     case (Expr)`<Expr e1> / <Expr e2>`:
-      return eDiv(cst2ast(e1), cst2ast(e2));
+      return eDiv(cst2ast(e1), cst2ast(e2), src=e@\loc);
     case (Expr)`<Expr e1> * <Expr e2>`:
-      return eProd(cst2ast(e1), cst2ast(e2));
+      return eProd(cst2ast(e1), cst2ast(e2), src=e@\loc);
     case (Expr)`<Expr e1> - <Expr e2>`:
-      return eSub(cst2ast(e1), cst2ast(e2));
+      return eSub(cst2ast(e1), cst2ast(e2), src=e@\loc);
     case (Expr)`<Expr e1> + <Expr e2>`:
-      return eAdd(cst2ast(e1), cst2ast(e2));
+      return eAdd(cst2ast(e1), cst2ast(e2), src=e@\loc);
     
     // comparison operations
     case (Expr)`<Expr e1> \< <Expr e2>`:
-      return eLt(cst2ast(e1), cst2ast(e2));
+      return eLt(cst2ast(e1), cst2ast(e2), src=e@\loc);
     case (Expr)`<Expr e1> \<= <Expr e2>`:
-      return eLeq(cst2ast(e1), cst2ast(e2));
+      return eLeq(cst2ast(e1), cst2ast(e2), src=e@\loc);
     case (Expr)`<Expr e1> \> <Expr e2>`:
-      return eGt(cst2ast(e1), cst2ast(e2));
+      return eGt(cst2ast(e1), cst2ast(e2), src=e@\loc);
     case (Expr)`<Expr e1> \>= <Expr e2>`:
-      return eGeq(cst2ast(e1), cst2ast(e2));
+      return eGeq(cst2ast(e1), cst2ast(e2), src=e@\loc);
       
     
     default: throw "Unhandled expression: <e>";
