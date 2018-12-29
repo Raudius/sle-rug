@@ -100,8 +100,6 @@ set[Message] check(AQuestion q, TEnv tenv, UseDef useDef) {
 set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
   set[Message] msgs = {};
   
-  println(e.src);
-  
   switch (e) {
     case ref(str x, src = loc u):
       msgs += { error("Undeclared question \'<x>\'", u) | useDef[u] == {} };
