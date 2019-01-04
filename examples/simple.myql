@@ -1,0 +1,24 @@
+form simple {
+  "simple question"
+    in: integer
+  
+  "computed question"
+    a: integer = in + 1
+   
+  "computed dependence"
+    b: integer = a + 1
+    
+  "repeated question"
+    str: string = "hello"
+  
+  if(in < 18) {
+    "Have you ever drank an underage person?"
+     drank:boolean
+  }
+  
+  if(false) {
+  }
+  else{
+    
+  }	
+}

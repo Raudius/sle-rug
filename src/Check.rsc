@@ -141,6 +141,10 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
       if (<u, loc d> <- useDef, <d, x, _, Type t> <- tenv)
         return t;
     
+    // nested expressions
+    case eBracks(AExpr e):
+      return typeOf(e, tenv, useDef);
+    
     // literals
     case eInt(int n):
       return tint();

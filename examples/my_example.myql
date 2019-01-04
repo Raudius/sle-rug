@@ -22,27 +22,5 @@ form emptyForm {
       q42: string = "THIS IS NOT SHOWN"
   }
   
-  // errors
-  ""
-    a: boolean = 1
-  ""
-    a: boolean = 1 + a
-  ""
-    a: boolean = 2 - a
-  ""
-    a: boolean = 3 * a
-  ""
-    a: boolean = 3 / a
-  ""
-    a: boolean = b
-  ""
-    a: integer
-  
-  if(true < false)  {}
-  if(true <= false) {}
-  if(true > false)  {}
-  if(true >= false) {}
-  if(q42) {}
-  if(q0) {}
   
 }
