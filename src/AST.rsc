@@ -34,6 +34,8 @@ data AExpr(loc src = |tmp:///|)
   | eProd(AExpr e1, AExpr e2)
   | eAdd(AExpr e1, AExpr e2)
   | eSub(AExpr e1, AExpr e2)
+  | eAnd(AExpr e1, AExpr e2)
+  | eOr(AExpr e1, AExpr e2)
   ;
 
 data AType(loc src = |tmp:///|) 

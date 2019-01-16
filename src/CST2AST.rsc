@@ -79,6 +79,12 @@ AExpr cst2ast(Expr e) {
       return eGt(cst2ast(e1), cst2ast(e2), src=e@\loc);
     case (Expr)`<Expr e1> \>= <Expr e2>`:
       return eGeq(cst2ast(e1), cst2ast(e2), src=e@\loc);
+    
+    // boolean operations
+    case (Expr)`<Expr e1> && <Expr e2>`:
+      return eAnd(cst2ast(e1), cst2ast(e2), src=e@\loc);
+    case (Expr)`<Expr e1> || <Expr e2>`:
+      return eOr(cst2ast(e1), cst2ast(e2), src=e@\loc);
       
     
     default: throw "Unhandled expression: <e>";

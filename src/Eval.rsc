@@ -110,7 +110,7 @@ VEnv eval(AQuestion q, Input inp, VEnv venv) {
 
     // If question
     case qIf(AExpr cond, list[AQuestion] block):
-      if( eval(cond, env).b )
+      if( eval(cond, venv).b )
         for(AQuestion q <- block)  eval(q, inp, venv);
     
     // If-then-else question
@@ -148,6 +148,12 @@ Value eval(AExpr e, VEnv venv) {
       return vbool( eval(e1, venv).n > eval(e2, venv).n );
     case eGeq(AExpr e1, AExpr e2): 
       return vbool( eval(e1, venv).n >= eval(e2, venv).n );
+      
+    // booolean ops
+    case eAnd(AExpr e1, AExpr e2):
+      return vbool( eval(e1, venv).b && eval(e2, venv).b);
+    case eOr(AExpr e1, AExpr e2):
+	      return vbool(eval(e1,venv).b || eval(e2, venv).b);
     
     // arithmetical operators
     case eDiv(AExpr e1, AExpr e2): 

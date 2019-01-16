@@ -2,11 +2,18 @@ form simple {
   "simple question"
     in: integer
   
+  "same same"
+    in: integer
+    
+  "same same computed"
+    a: integer
+  
   "computed question"
     a: integer = in + 1
    
   "computed dependence"
     b: integer = a + 1
+  
     
   "repeated question"
     str: string = "hello"
@@ -16,9 +23,12 @@ form simple {
      drank:boolean
   }
   
-  if(false) {
+  if(drank) {
+    "Has dranks?"
+      ans:string = "YES"
   }
   else{
-    
+    "Has dranks?"
+      ans2:string = "NO"  
   }	
 }

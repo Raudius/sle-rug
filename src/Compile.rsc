@@ -62,7 +62,7 @@ HTML5Attr v_else() = html5attr("v-else", "");
 // simple question
 HTML5Node q2html(qSimple(str qst, str id, AType t)) =
   p(
-    qst,
+    "<qst>: ",
     input(
       [
         *[v_model("q_<id>") | getType(t) != tint()], // tint() has its own v_model for automatic casting
@@ -76,7 +76,7 @@ HTML5Node q2html(qSimple(str qst, str id, AType t)) =
 
 // question with definition
 HTML5Node q2html(qSimpleDef(str qst, str id, AType t, AExpr val))
-  = p(qst, "{{ get_" + id + "() }}");
+  = p("<qst>: ", "{{ get_" + id + "() }}");
 
 // if-block
 HTML5Node q2html(qIf(AExpr cond, list[AQuestion] block))

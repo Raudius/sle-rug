@@ -129,6 +129,14 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
     case eSub(AExpr e1, AExpr e2, src = loc u):
       msgs += { error("Operator - expects int operands", u)
                  | typeOf(e1, tenv,  useDef) != tint() || typeOf(e2, tenv,  useDef) != tint()};
+         
+    // boolean operators must have boolean operands        
+    case eAnd(AExpr e1, AExpr e2, src = loc u):
+      msgs += { error("Operator && expects bool operands", u) 
+                | typeOf(e1, tenv, useDef) != tbool() || typeOf(e2, tenv, useDef) != tbool()};
+    case eOr(AExpr e1, AExpr e2, src = loc u):
+      msgs += { error("Operator || expects bool operands", u) 
+                | typeOf(e1, tenv, useDef) != tbool() || typeOf(e2, tenv, useDef) != tbool()};  
   }
   
   return msgs; 
@@ -153,7 +161,7 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
     case eStr(str s):
       return tstr();
       
-    // Comparison operator returns booleans
+    // Comparison/boolean operators returns booleans
     case eLt(AExpr e1, AExpr e2):
       return tbool();
     case eLeq(AExpr e1, AExpr e2):
@@ -162,6 +170,12 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
       return tbool();
     case eGeq(AExpr e1, AExpr e2):
       return tbool();
+      
+    case eAnd(AExpr e1, AExpr e2):
+      return tbool();
+    case eOr(AExpr e1, AExpr e2):
+      return tbool();
+      
     
     // Arithmetic operators return integers
     case eDiv(AExpr e1, AExpr e2):
