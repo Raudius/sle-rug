@@ -1,0 +1,12 @@
+form flattenable {
+  "Make it true"
+    q0 : boolean
+    
+  if(q0) {
+    "if q0"  q1:boolean
+    
+    if(q1) {
+      "if q0 and q1"  q2:boolean
+    }
+  }
+}

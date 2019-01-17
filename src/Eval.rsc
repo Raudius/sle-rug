@@ -111,17 +111,37 @@ VEnv eval(AQuestion q, Input inp, VEnv venv) {
     // If question
     case qIf(AExpr cond, list[AQuestion] block):
       if( eval(cond, venv).b )
-        for(AQuestion q <- block)  eval(q, inp, venv);
+        for(AQuestion q <- block)  venv += eval(q, inp, venv);
+      else 
+        venv = removeNames(venv, block);
     
     // If-then-else question
     case qIfElse(AExpr cond, list[AQuestion] ifBlock, list[AQuestion] elseBlock):
-      if( eval(cond, venv).b )
-        for(AQuestion q <- ifBlock)   eval(q, inp, venv);
-      else
-        for(AQuestion q <- elseBlock) eval(q, inp, venv);
+      if( eval(cond, venv).b ) {
+        venv = removeNames(venv, elseBlock);
+        for(AQuestion q <- ifBlock)   venv += eval(q, inp, venv);
+      }
+      else {
+        venv = removeNames(venv, ifBlock);
+        for(AQuestion q <- elseBlock) venv += eval(q, inp, venv);
+      }
   }
   
   return venv; 
+}
+
+
+VEnv removeName(VEnv env, qSimple(_, str id, _)) = env - (id:0);
+VEnv removeName(VEnv env, qSimpleDef(_, str id, _, _)) = env - (id:0);
+VEnv removeName(VEnv env, qIf(_, list[AQuestion] block)) = removeNames(env, block);
+VEnv removeName(VEnv env, qIfElse(_, list[AQuestion] ifBlock, list[AQuestion] elseBlock))
+  = removeName(removeNames(env, ifBlock), elseBlock);
+
+VEnv removeNames(VEnv env, list[AQuestion] qs) {
+  for(AQuestion q <- qs) {
+    env = removeName(env, q);
+  }
+  return env;
 }
 
 

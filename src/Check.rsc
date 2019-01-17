@@ -17,20 +17,6 @@ data Type
   | tunknown()
   ;
   
-void check_test(loc src) {
-  AForm f = cst2ast(parse(#start[Form], src));
-  UseDef use_def = resolve(f);
-  TEnv tenv = collect(f);
-  
-  set[Message] msgs = check(f, tenv, use_def);
-  
-  println(size(msgs));
-  for(Message m <- msgs) {
-    println(m);
-  }
-}
-
-  
 Type getType(typeBool()) = tbool();
 Type getType(typeInt()) = tint();
 Type getType(typeStr()) = tstr();
@@ -51,10 +37,12 @@ TEnv collect(qIfElse(AExpr cond, list[AQuestion] ifBlock, list[AQuestion] elseBl
 TEnv collect(AForm f) = {*collect(q) | /AQuestion q := f};
 
 
+// get all errors in the form
 set[Message] check(AForm f, TEnv tenv, UseDef useDef)
   = { *check(q, tenv, useDef) | /AQuestion q <- f.questions};
 
-// produces errors or warnings for duplicate labels
+
+// produces errors or warnings for duplicate labels (depending on type agreement)
 // If a type error is already given it does not produce a duplicate label error
 set[Message] checkDups(loc u, str id, TEnv tenv) {
   set[Message] msgs = {};
@@ -62,8 +50,7 @@ set[Message] checkDups(loc u, str id, TEnv tenv) {
   list[Type] types = [t | <loc u, id, str l, Type t> <- tenv];
   
   msgs += { error("TypeError: Duplicate label \'<id>\' initiated with different types.", u) | size(toSet(types)) > 1} ;
-  msgs += { warning("Duplicate label used for <id>", u) | size(msgs) == 0 &&size(types) > 1 };
-  
+  msgs += { warning("Duplicate label used for <id>", u) | size(msgs) == 0 &&size(types) > 1 };  
   return msgs;
 }
 
@@ -142,6 +129,7 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
   return msgs; 
 }
 
+// Returns the type of an expression
 Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
   switch (e) {
     // return type of refferenced var from definition

@@ -1,34 +1,39 @@
 form simple {
-  "simple question"
+  "Simple question"
     in: integer
   
-  "same same"
+  "Same question as above"
     in: integer
+     
+  "Questions above added plus 1"
+    b: integer = in + in + 1
+  
+  "String input"
+    str: string
     
-  "same same computed"
-    a: integer
+  "Boolean input"
+    bool: boolean
   
-  "computed question"
-    a: integer = in + 1
-   
-  "computed dependence"
-    b: integer = a + 1
-  
-    
-  "repeated question"
-    str: string = "hello"
-  
-  if(in < 18) {
-    "Have you ever drank an underage person?"
-     drank:boolean
+  if(in > 10) {
+    "First question is larger than 10"
+       bool2:boolean = true
   }
   
-  if(drank) {
-    "Has dranks?"
-      ans:string = "YES"
+  if(bool) {
+    "Is bool true?"
+      ansYes2:string = "YES"
+  }
+  
+  if(bool) {
+    "Boolean input is true?"
+      ansYes:string = "YES"
+    
+    "Same string as above"
+      str: string
   }
   else{
-    "Has dranks?"
-      ans2:string = "NO"  
-  }	
+    "Boolean input is true?"
+      ansNo:string = "NO"  
+  }
+  
 }
